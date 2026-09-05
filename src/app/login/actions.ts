@@ -56,8 +56,9 @@ export async function signUp(
     },
   });
 
-  if (error) {
-    return { error: "No s'ha pogut crear el compte. Prova amb un altre correu." };
+    if (error) {
+    console.error("signUp:", error.message);
+    return { error: error.message };
   }
 
   // Amb la confirmació per correu activada a Supabase no hi ha sessió encara.
