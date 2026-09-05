@@ -131,36 +131,27 @@ export default async function SummaryPage() {
 
       <h1 className="text-xl first-letter:uppercase">{monthName}</h1>
 
-      {hasJoint && (
-        <Block
-          title="De casa"
-          hint="Els comptes que feu servir tots dos"
-          income={joint.income}
-          expense={joint.expense}
-          net={joint.net}
-          balance={jointBalance}
-          currency={currency}
-        />
-      )}
+      <Block
+        title="De casa"
+        hint="Els comptes que feu servir tots dos"
+        income={joint.income}
+        expense={joint.expense}
+        net={joint.net}
+        balance={jointBalance}
+        currency={currency}
+        empty={!hasJoint ? "Encara no teniu cap compte conjunt." : null}
+      />
 
-      {hasPersonal && (
-        <Block
-          title="Els teus"
-          hint="Només els teus comptes personals"
-          income={mine.income}
-          expense={mine.expense}
-          net={mine.net}
-          balance={myBalance}
-          currency={currency}
-        />
-      )}
-
-      {!hasJoint && !hasPersonal && (
-        <p className="text-sm text-muted">
-          Els teus comptes són de la teva parella. Mira el resum des del seu
-          compte.
-        </p>
-      )}
+      <Block
+        title="Els teus"
+        hint="Només els teus comptes personals"
+        income={mine.income}
+        expense={mine.expense}
+        net={mine.net}
+        balance={myBalance}
+        currency={currency}
+        empty={!hasPersonal ? "Encara no tens cap compte personal." : null}
+      />
 
       {members.length > 1 && (
         <section className="rounded-md border border-line bg-surface p-5">
@@ -193,6 +184,7 @@ function Block({
   net,
   balance,
   currency,
+  empty,
 }: {
   title: string;
   hint: string;
@@ -201,6 +193,7 @@ function Block({
   net: number;
   balance: number;
   currency: string;
+  empty?: string | null;
 }) {
   return (
     <section>
@@ -209,22 +202,33 @@ function Block({
           {title}
           <span className="ml-2 text-sm text-muted">{hint}</span>
         </h2>
-        <p className="text-sm text-muted">
-          Saldo <Balance cents={balance} currency={currency} />
-        </p>
+        {!empty && (
+          <p className="text-sm text-muted">
+            Saldo <Balance cents={balance} currency={currency} />
+          </p>
+        )}
       </div>
 
-      <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3">
-        <Cell label="Ha entrat">
-          <Amount cents={income} currency={currency} className="text-2xl" />
-        </Cell>
-        <Cell label="Ha sortit">
-          <Amount cents={expense} currency={currency} className="text-2xl" />
-        </Cell>
-        <Cell label="Queda del mes">
-          <Balance cents={net} currency={currency} className="text-2xl" />
-        </Cell>
-      </div>
+      {empty ? (
+        <p className="mt-3 rounded-md border border-dashed border-line-strong px-5 py-4 text-sm text-muted">
+          {empty}{" "}
+          <Link href="/dashboard/comptes" className="text-ink underline underline-offset-4">
+            Crea&apos;n un
+          </Link>
+        </p>
+      ) : (
+        <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3">
+          <Cell label="Ha entrat">
+            <Amount cents={income} currency={currency} className="text-2xl" />
+          </Cell>
+          <Cell label="Ha sortit">
+            <Amount cents={expense} currency={currency} className="text-2xl" />
+          </Cell>
+          <Cell label="Queda del mes">
+            <Balance cents={net} currency={currency} className="text-2xl" />
+          </Cell>
+        </div>
+      )}
     </section>
   );
 }
