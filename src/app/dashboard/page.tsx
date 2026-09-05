@@ -78,22 +78,20 @@ export default async function SummaryPage() {
     return { income, expense, net: income + expense };
   };
 
-  const joint = totals(txs.filter((t) => t.accounts?.owner_id === null));
+  // Tot el que l'usuari pot veure, i el subconjunt dels seus comptes personals
+  const all = totals(txs);
   const mine = totals(txs.filter((t) => t.accounts?.owner_id === user.id));
 
   const balances = (balancesRes.data ?? []) as {
     balance_cents: number;
     owner_id: string | null;
   }[];
-  const jointBalance = balances
-    .filter((b) => b.owner_id === null)
-    .reduce((s, b) => s + Number(b.balance_cents), 0);
+  const allBalance = balances.reduce((s, b) => s + Number(b.balance_cents), 0);
   const myBalance = balances
     .filter((b) => b.owner_id === user.id)
     .reduce((s, b) => s + Number(b.balance_cents), 0);
 
   const hasPersonal = accounts.some((a) => a.owner_id === user.id);
-  const hasJoint = accounts.some((a) => a.owner_id === null);
 
   const monthName = new Intl.DateTimeFormat("ca-ES", {
     month: "long",
@@ -132,14 +130,13 @@ export default async function SummaryPage() {
       <h1 className="text-xl first-letter:uppercase">{monthName}</h1>
 
       <Block
-        title="De casa"
-        hint="Els comptes que feu servir tots dos"
-        income={joint.income}
-        expense={joint.expense}
-        net={joint.net}
-        balance={jointBalance}
+        title="Tot"
+        hint="Conjunt i personal, tot sumat"
+        income={all.income}
+        expense={all.expense}
+        net={all.net}
+        balance={allBalance}
         currency={currency}
-        empty={!hasJoint ? "Encara no teniu cap compte conjunt." : null}
       />
 
       <Block
@@ -212,7 +209,10 @@ function Block({
       {empty ? (
         <p className="mt-3 rounded-md border border-dashed border-line-strong px-5 py-4 text-sm text-muted">
           {empty}{" "}
-          <Link href="/dashboard/comptes" className="text-ink underline underline-offset-4">
+          <Link
+            href="/dashboard/comptes"
+            className="text-ink underline underline-offset-4"
+          >
             Crea&apos;n un
           </Link>
         </p>
